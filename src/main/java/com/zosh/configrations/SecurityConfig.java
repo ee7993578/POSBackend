@@ -13,7 +13,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
-
+import org.springframework.http.HttpMethod;
 import java.util.Arrays;
 import java.util.Collections;
 
@@ -28,10 +28,13 @@ public class SecurityConfig {
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 		
 		return http.sessionManagement(management -> management.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-				.authorizeHttpRequests(Authorize -> Authorize
-						.requestMatchers("/api/**").authenticated()
-						.requestMatchers("/api/super-admin/**").hasRole("ADMIN")
-						.anyRequest().permitAll())
+				.authorizeHttpRequests(auth -> auth
+        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+        .requestMatchers("/auth/**").permitAll()
+        .requestMatchers("/api/**").authenticated()
+        .requestMatchers("/api/super-admin/**").hasRole("ADMIN")
+        .anyRequest().permitAll()
+									  )
 			.addFilterBefore(new JwtValidator(), BasicAuthenticationFilter.class)
 			.csrf(AbstractHttpConfigurer::disable)
 			.cors(cors -> cors.configurationSource(corsConfigurationSource()))
